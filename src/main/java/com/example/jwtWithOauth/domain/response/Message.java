@@ -1,5 +1,6 @@
 package com.example.jwtWithOauth.domain.response;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,5 +16,12 @@ public class Message {
         this.status = StatusEnum.BAD_REQUEST;
         this.data = null;
         this.message = null;
+    }
+
+    @Builder
+    public Message(StatusEnum status, String message, Object data) {
+        this.status = status;
+        this.message = message;
+        this.data = data;
     }
 }
