@@ -4,6 +4,7 @@ import com.example.jwtWithOauth.config.jwt.JwtProperties;
 import com.example.jwtWithOauth.domain.dto.LoginRequestDto;
 import com.example.jwtWithOauth.domain.User;
 import com.example.jwtWithOauth.domain.UserRole;
+import com.example.jwtWithOauth.domain.dto.RefreshTokenDto;
 import com.example.jwtWithOauth.domain.dto.TokenDto;
 import com.example.jwtWithOauth.domain.dto.TokenResponse;
 import com.example.jwtWithOauth.domain.response.Message;
@@ -11,6 +12,7 @@ import com.example.jwtWithOauth.domain.response.ResponseEntity;
 import com.example.jwtWithOauth.domain.response.StatusEnum;
 import com.example.jwtWithOauth.repository.refreshtoken.RefreshToken;
 import com.example.jwtWithOauth.repository.refreshtoken.RefreshTokenRepository;
+import com.example.jwtWithOauth.service.TokenService;
 import com.example.jwtWithOauth.service.UserService;
 import com.example.jwtWithOauth.util.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,7 @@ public class TestController {
     private final TokenProvider tokenProvider;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final TokenService tokenService;
 
     @PostMapping("/test")
     public String zz(@RequestBody String name) {
@@ -73,16 +76,43 @@ public class TestController {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(JwtProperties.HEADER_STRING, "Bearer " + accessToken);
         TokenResponse result = TokenResponse.builder()
-                                            .jwt(new TokenDto(accessToken,refreshToken))
-                                            .exist(false)
-                                            .build();
+                .jwt(new TokenDto(accessToken, refreshToken))
+                .exist(false)
+                .build();
         Message message = Message.builder().data(result).status(StatusEnum.OK).message(null).build();
         return new ResponseEntity(message, httpHeaders, HttpStatus.OK);
     }
 
     @GetMapping("/oauth/login")
-    private String oauthLogin(@AuthenticationPrincipal OAuth2User oAuth2User){
+    public String oauthLogin(@AuthenticationPrincipal OAuth2User oAuth2User) {
         System.out.println("oAuth2User = " + oAuth2User);
         return "JWT";
+    }
+
+    @PostMapping("/accessToken")
+    /**
+     *  {
+     *      refreshToken : xx
+     *  }
+     */
+    public ResponseEntity<Message> accessToken(@RequestBody RefreshTokenDto refreshToken) {
+        System.out.println("refreshToken = " + refreshToken);
+        String accessToken = tokenService.generateAccessToken(refreshToken.getRefreshToken());
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add(JwtProperties.HEADER_STRING, "Bearer " + accessToken);
+        TokenResponse result = TokenResponse.builder()
+                .jwt(new TokenDto(accessToken, refreshToken.getRefreshToken()))
+                .exist(false)
+                .build();
+        Message message = Message.builder().data(result).status(StatusEnum.OK).message(null).build();
+        return new ResponseEntity(message, httpHeaders, HttpStatus.OK);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Message> logOut(@RequestBody RefreshTokenDto refreshToken) {
+        // Todo : 1. accessToken 확인 2. RefreshToken 삭제 (userId 이용) 3. BlackList (유효기간동안 접근시)
+        Message message = Message.builder().data("ㅋㅋ").status(StatusEnum.OK).message(null).build();
+        HttpHeaders httpHeaders = new HttpHeaders();
+        return new ResponseEntity(message, httpHeaders, HttpStatus.OK);
     }
 }

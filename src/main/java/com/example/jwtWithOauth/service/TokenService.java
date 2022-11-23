@@ -37,6 +37,7 @@ public class TokenService {
     public String generateAccessToken(final String requestRefreshToken) {
         RefreshToken refreshToken = refreshTokenRepository.findById(requestRefreshToken)
                 .orElseThrow(IllegalArgumentException::new);
+        System.out.println("refreshToken2 = " + refreshToken);
         // Todo : RefreshToken Exception
         Long memberId = refreshToken.getUserId();
         User findUser = userRepository.findById(memberId)

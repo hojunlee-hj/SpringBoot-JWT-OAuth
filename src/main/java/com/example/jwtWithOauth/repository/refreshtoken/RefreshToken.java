@@ -1,11 +1,10 @@
 package com.example.jwtWithOauth.repository.refreshtoken;
 
 import lombok.Getter;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
-import javax.persistence.Id;
-
-@RedisHash(value = "refreshToken", timeToLive = 60)
+@RedisHash(value = "refreshToken", timeToLive = 6000)
 @Getter
 public class RefreshToken {
 
@@ -17,5 +16,4 @@ public class RefreshToken {
         this.refreshToken = refreshToken;
         this.userId = userId;
     }
-
 }
